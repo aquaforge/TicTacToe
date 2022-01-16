@@ -9,8 +9,8 @@ int counter = 0;
 
 while (true)
 {
-    g.DoMove(new Point(counter,counter));
-    counter++;  
+    g.DoMove(new Point(counter, counter));
+    counter++;
 
 
     Console.Clear();
@@ -23,17 +23,18 @@ while (true)
             switch (g[m, n])
             {
                 case PlayerTypes.X:
-                    s = "x";
+                    s = "X";
                     break;
                 case PlayerTypes.O:
-                    s = "o";
+                    s = "O";
                     break;
                 default:
                     break;
             }
-            if (lastMovePoint.M == m && lastMovePoint.N == n) s = s.ToUpper();
-
-            Console.Write(s + " ");
+            if (lastMovePoint.M == m && lastMovePoint.N == n) Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(s);
+            Console.ResetColor();
+            Console.Write(" ");
         }
         Console.WriteLine();
     }
