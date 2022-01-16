@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace TicTacToeGame
 {
-    public interface IPlayer
+    public interface IPlayerAI
     {
         public PlayerInfo GetPlayerInfo();
-        public MovementSearchStatus GetNextMovement(Game g, out Point? newPoint);
+        public Point GetNextMovement(IGame g);
 
     }
 }

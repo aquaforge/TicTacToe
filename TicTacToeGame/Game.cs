@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace TicTacToeGame
 {
     [Serializable]
-    public class Game : IStateMachineReady
+    public class Game : IStateMachineReady, IGame
     {
 
         private readonly LinkedList<Movement> _movements = new();
@@ -27,6 +27,8 @@ namespace TicTacToeGame
         public int LengthM { get => _lengthM; }
         public int LengthN { get => _lengthN; }
 
+        public int TotalMovements => _movements.Count();
+
         public PlayerTypes PlayerToMove
         {
             get
@@ -41,9 +43,11 @@ namespace TicTacToeGame
             get { return Matrixes.MatrixCopy<PlayerTypes>(_board); }
         }
 
-        public LinkedList<Movement> Movements
+        public List<Movement> MovementsAsList(int top = 0)
         {
-            get { return MovementsCopy(_movements); }
+            List<Movement> result = _movements.ToList();
+            if (top == 0 || _movements.Count <= top) return result;
+            return result.GetRange(_movements.Count - top, top);
         }
 
         public PlayerTypes this[int m, int n]
@@ -159,16 +163,6 @@ namespace TicTacToeGame
 
 
 
-        public static LinkedList<Movement> MovementsCopy(LinkedList<Movement> movement)
-        {
-            var q = new LinkedList<Movement>();
-            for (int i = 0; i < movement.Count - 1; i++)
-            {
-                Movement m = movement.ElementAt(i);
-                q.AddLast(new Movement(player: m.Player, elapsedMilliseconds: m.ElapsedMilliseconds, point: new Point(m.Point.M, m.Point.N)));
-            }
-            return q;
-        }
 
         public void StateChange(int endState, Action<object>? action, object arguments)
         //public void StateChange(int endState, Action<GameActionArgument>? action, GameActionArgument arguments)

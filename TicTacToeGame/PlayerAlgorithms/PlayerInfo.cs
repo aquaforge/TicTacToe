@@ -9,7 +9,6 @@ namespace TicTacToeGame
     [Serializable]
     public struct PlayerInfo
     {
-        public PlayerTypes Player;
         public string AlgorithmName;
     }
 }

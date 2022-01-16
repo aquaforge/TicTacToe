@@ -18,7 +18,7 @@ namespace TicTacToeGame
             N = n;
         }
 
-        public override string ToString() => $"({M},{N})";
+        public override string ToString() => $"({M,2},{N,2})";
 
         public Point Copy() => new (M, N);
 
