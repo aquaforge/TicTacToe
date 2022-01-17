@@ -30,7 +30,7 @@ namespace TicTacToeGame
                 g.DoMove(p);
 
                 DrawToConsole(g);
-                Console.ReadKey();
+                //Console.ReadKey();
             }
 
         }

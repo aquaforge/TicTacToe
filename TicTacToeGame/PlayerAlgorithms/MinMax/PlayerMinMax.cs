@@ -8,6 +8,10 @@ namespace TicTacToeGame
 {
     public class PlayerMinMax : IPlayerAI
     {
+        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        CancellationToken token;
+
+
         private const int SEARCH_CELL_RANGE = 2;
         private const int SEARCH_DEPTH = 3;
 
@@ -15,6 +19,11 @@ namespace TicTacToeGame
 
         public Point GetNextMovement(IGame g)
         {
+            token = cancelTokenSource.Token;
+            //cancelTokenSource.Cancel();
+            //if (token.IsCancellationRequested) {}
+
+
             TreeNode<MinMaxTreeNodeData> root = new(new MinMaxTreeNodeData(g.PlayerToMove, Point.MaxPoint, true, g.Board), null);
             CalculateFitness(root);
 
@@ -25,6 +34,8 @@ namespace TicTacToeGame
 
         private void CalculateFitness(TreeNode<MinMaxTreeNodeData> node)
         {
+            if (token.IsCancellationRequested) return;
+
             MinMaxTreeNodeData data = node.Data;
             HashSet<Point> points = new(new PointEqualityComparer());
 
@@ -50,11 +61,14 @@ namespace TicTacToeGame
 
             if (points.Count > 0)
             {
-                Parallel.ForEach(points, (p) =>
-                {
-                    TreeNode<MinMaxTreeNodeData> child = node.AddChild(new MinMaxTreeNodeData(data.Player, p.Copy(), !data.IsMyTurn, board));
-                    CalculateFitness(child);
-                });
+                ParallelLoopResult parallelResult = Parallel.ForEach(points, new ParallelOptions { CancellationToken = token }, (p) =>
+                 {
+                     TreeNode<MinMaxTreeNodeData> child = node.AddChild(new MinMaxTreeNodeData(data.Player, p.Copy(), !data.IsMyTurn, board));
+                     CalculateFitness(child);
+                 });
+
+                Task.FromResult(parallelResult).Wait();
+
                 double fitness = node.Children.Max(c => c.Data.FitnessValue);
                 data.FitnessValue = fitness;
             }
