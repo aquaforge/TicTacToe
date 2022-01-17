@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace TicTacToeGame
 {
-    public class TreeNode<TData> : IEnumerable<TreeNode<TData>>
+    public class TreeNode<TData>
     {
-        public TData Data { get; set; }
+        public TData? Data { get; set; }
         public TreeNode<TData>? Parent { get; set; }
-        public List<TreeNode<TData>> Children { get; set; }
+        public List<TreeNode<TData>> Children { get; set; } = new();
 
-        public TreeNode(TData data)
+        public TreeNode(TData? data, TreeNode<TData>? parent)
         {
-            this.Data = data;
-            this.Children = new();
+            Data = data;
+            Parent = parent;
         }
 
         public Boolean IsRoot => Parent == null;
@@ -29,35 +29,18 @@ namespace TicTacToeGame
             get
             {
                 if (IsRoot) return 0;
-                return Parent.Level + 1;
+                return (Parent?.Level ?? 0) + 1;
             }
         }
 
-        public override string ToString()
-        {
-            if (Data != null)
-                return Data.ToString();
-            else
-                return "[null]";
-        }
+        public override string ToString() => Data?.ToString() ?? "";
+        
 
         public TreeNode<TData> AddChild(TData data)
         {
-            TreeNode<TData> childNode = new(data) { Parent = this };
+            TreeNode<TData> childNode = new(data, this);
             Children.Add(childNode);
             return childNode;
         }
-
-        #region IEnumerable
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public IEnumerator<TreeNode<TData>> GetEnumerator()
-        {
-            yield return this;
-            foreach (var child in this.Children)
-                foreach (var a in child)
-                    yield return a;
-        }
-        #endregion
-
     }
 }

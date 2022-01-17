@@ -32,6 +32,7 @@ namespace TicTacToeGame
         }
 
         static public Point Zero=> new Point(0,0);
+        static public Point MaxPoint=> new Point(int.MaxValue, int.MaxValue);
 
     }
 

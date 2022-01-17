@@ -3,8 +3,10 @@
     [Serializable]
     public enum GameStates
     {
-        PAUSED,
+        NEW_TURN_READY,
         THINKING,
+        PAUSED,
+        CHECKING_RESULT,
         X_WON,
         O_WON,
         DRAW

@@ -9,13 +9,11 @@ Random rand = new Random();
 
 while (true)
 {
+    g.DoStartThinking();
     g.DoMove(new Point(counter, counter));
     counter++;
 
-
-    Point lastMovePoint = g.LastMovePoint;
-
-
+    #region HEADER
     Console.Clear();
     Console.Write("   ");
     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -25,6 +23,9 @@ while (true)
     }
     Console.ResetColor();
     Console.WriteLine();
+    #endregion
+
+    Point MovementLastCell = g.MovementLastCell;
 
     for (int n = 0; n < g.LengthN; n++)
     {
@@ -47,7 +48,7 @@ while (true)
                     break;
             }
             Console.Write(" ");
-            if (lastMovePoint.M == m && lastMovePoint.N == n)
+            if (MovementLastCell.M == m && MovementLastCell.N == n)
                 Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(s);
             Console.ResetColor();
@@ -56,13 +57,11 @@ while (true)
         Console.WriteLine();
     }
 
-    Console.WriteLine();
-    List<Movement> movements = g.MovementsAsList(5);
+    Console.WriteLine(g.GameState.ToString().ToLower() + " " + g.MovementsCount);
+    List<Movement> movements = g.MovementsGetTop;
     for (int i = movements.Count() - 1; i >= 0; i--)
         Console.WriteLine(movements[i].ToString());
 
-    g.DoPause();
     Console.ReadKey();
-
 }
 

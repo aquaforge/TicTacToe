@@ -1,17 +1,22 @@
-﻿
-namespace TicTacToeGame
+﻿namespace TicTacToeGame
 {
     public interface IGame
     {
         PlayerTypes this[int m, int n] { get; }
 
-        PlayerTypes[,] Board { get; }
+        Board Board { get; }
+        int EmptyCellsCount { get; }
+        int FilledCellsCount { get; }
         GameStates GameState { get; }
-        PlayerTypes LastMovePlayer { get; }
-        Point LastMovePoint { get; }
+        Point MovementLastCell { get; }
+        PlayerTypes MovementLastPlayer { get; }
         int LengthM { get; }
         int LengthN { get; }
         PlayerTypes PlayerToMove { get; }
-        List<Movement> MovementsAsList(int top);
+
+        void DoMove(Point p);
+        void DoPause();
+        void DoStartThinking();
+        void DoUndo();
     }
 }

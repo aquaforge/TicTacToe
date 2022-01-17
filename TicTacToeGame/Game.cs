@@ -12,166 +12,128 @@ namespace TicTacToeGame
     public class Game : IStateMachineReady, IGame
     {
 
-        private readonly LinkedList<Movement> _movements = new();
-        private readonly Stopwatch stopWatch = new();
+        private readonly Movements _movements = new();
+
+        private Stopwatch? _stopWatch;
 
         private readonly StateMachine _stateMachine;
 
-        private readonly PlayerTypes[,] _board;
-        private readonly int _lengthM;
-        private readonly int _lengthN;
-
-        private GameStates _gameState = GameStates.PAUSED;
+        private GameStates _gameState = GameStates.NEW_TURN_READY;
         public GameStates GameState => _gameState;
         public int State { get => (int)_gameState; }
-        public int LengthM { get => _lengthM; }
-        public int LengthN { get => _lengthN; }
 
-        public int TotalMovements => _movements.Count();
+        #region Board
+        private readonly Board _board;
+        public Board Board => _board.Copy();
+        public int LengthM { get => _board.LengthM; }
+        public int LengthN { get => _board.LengthN; }
+        public PlayerTypes this[int m, int n] => _board[m, n];
+        #endregion
 
-        public PlayerTypes PlayerToMove
+        public int FilledCellsCount => _board.FilledCellsCount;
+        public int EmptyCellsCount => _board.EmptyCellsCount;
+
+        public PlayerTypes PlayerToMove => _movements.PlayerToMove;
+        public PlayerTypes MovementLastPlayer => _movements.MovementLastPlayer;
+        public Point MovementLastCell => _movements.MovementLastCell;
+        public List<Movement> MovementsGetTop => _movements.MovementsGetTop();
+        public int MovementsCount => _movements.Count;
+
+
+
+        public Game(int m, int n)
         {
-            get
-            {
-                if (_movements.Count == 0) return PlayerTypes.X;
-                return LastMovePlayer == PlayerTypes.O ? PlayerTypes.X : PlayerTypes.O;
-            }
+            _board = new(m, n);
+
+            _stateMachine = new(this);
+            StateMachineInitialize();
+
+            //Do predefined first move to the center of board
+            _stateMachine.HandleEvent((int)GameEventes.START_THINKING, new object());
+            _stateMachine.HandleEvent((int)GameEventes.DO_MOVE, new Point(LengthM / 2, LengthN / 2));
         }
 
-        public PlayerTypes[,] Board
+
+
+        #region Game Actions for State Machine
+        public void StateChange(int endState, Action<object>? action, object arguments)
         {
-            get { return Matrixes.MatrixCopy<PlayerTypes>(_board); }
+            _gameState = (GameStates)endState;
+            action?.Invoke(arguments);
         }
 
-        public List<Movement> MovementsAsList(int top = 0)
+        private void StateMachineInitialize()
         {
-            List<Movement> result = _movements.ToList();
-            if (top == 0 || _movements.Count <= top) return result;
-            return result.GetRange(_movements.Count - top, top);
+            #region Add Transition Rules
+            _stateMachine.AddTransition((int)GameStates.NEW_TURN_READY, (int)GameEventes.START_THINKING, (int)GameStates.THINKING, ActionStartThinking);
+
+            //PAUSED vs THINKING
+            _stateMachine.AddTransition((int)GameStates.PAUSED, (int)GameEventes.START_THINKING, (int)GameStates.THINKING, ActionStartThinking);
+            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.PAUSE, (int)GameStates.PAUSED, ActionPause);
+
+            //DO_MOVE
+            _stateMachine.AddTransition((int)GameStates.PAUSED, (int)GameEventes.DO_MOVE, (int)GameStates.CHECKING_RESULT, ActionMove);
+            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.DO_MOVE, (int)GameStates.CHECKING_RESULT, ActionMove);
+
+            //GAME_CHECK_FINISHED 
+            _stateMachine.AddTransition((int)GameStates.CHECKING_RESULT, (int)GameEventes.X_WON, (int)GameStates.X_WON, null);
+            _stateMachine.AddTransition((int)GameStates.CHECKING_RESULT, (int)GameEventes.O_WON, (int)GameStates.O_WON, null);
+            _stateMachine.AddTransition((int)GameStates.CHECKING_RESULT, (int)GameEventes.DRAW, (int)GameStates.DRAW, null);
+            _stateMachine.AddTransition((int)GameStates.CHECKING_RESULT, (int)GameEventes.TO_NEXT_TURN, (int)GameStates.NEW_TURN_READY, null);
+
+            //UNDO_LAST_MOVE
+            _stateMachine.AddTransition((int)GameStates.NEW_TURN_READY, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.NEW_TURN_READY, ActionUndoLastMove);
+            _stateMachine.AddTransition((int)GameStates.X_WON, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.NEW_TURN_READY, ActionUndoLastMove);
+            _stateMachine.AddTransition((int)GameStates.O_WON, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.NEW_TURN_READY, ActionUndoLastMove);
+            _stateMachine.AddTransition((int)GameStates.DRAW, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.NEW_TURN_READY, ActionUndoLastMove);
+            #endregion
         }
-
-        public PlayerTypes this[int m, int n]
-        {
-            get { return _board[m, n]; }
-        }
-
-        public PlayerTypes LastMovePlayer => _movements.Last().Player;
-        public Point LastMovePoint => _movements.Last().Point.Copy();
-
-
-        #region Game Actions
 
         private void ActionStartThinking(object o)
         {
-            _gameState = GameStates.THINKING;
-            stopWatch.Start();
+            if (_stopWatch == null) _stopWatch = new Stopwatch();
+            _stopWatch.Start();
         }
 
         private void ActionPause(object o)
         {
-            _gameState = GameStates.PAUSED;
-            stopWatch.Stop();
+            _stopWatch?.Stop();
         }
 
         private void ActionUndoLastMove(object o)
         {
             if (_movements.Count == 0) return;
-            Point point = LastMovePoint;
+            Point point = MovementLastCell;
             _board[point.M, point.N] = PlayerTypes.EMPTY;
             _movements.RemoveLast();
-        }
-
-        private void ActionCheckVictory(object o)
-        {
-            if (Matrixes.IsWon(Board, LastMovePlayer, LastMovePoint))
-            {
-                _stateMachine.HandleEvent((int)(LastMovePlayer == PlayerTypes.X ? GameEventes.X_WON : GameEventes.O_WON), new object());
-                return;
-            }
-
-            if (_movements.Count == LengthM * LengthN) // все ячейки заполнены
-            {
-                _stateMachine.HandleEvent((int)GameEventes.DRAW, new object());
-                return;
-            }
         }
 
         private void ActionMove(object o)
         {
             if (o is not Point p) throw new ArgumentNullException("ActionMove");
 
-            if (_board[p.M, p.N] != PlayerTypes.EMPTY) throw new ArgumentException($"{p} already used");
+            if (_board[p.M, p.N] != PlayerTypes.EMPTY) throw new ArgumentException($"{p} already filled in");
 
             PlayerTypes player = PlayerToMove;
             _board[p.M, p.N] = player;
-            _movements.AddLast(new Movement(player: player, point: p, elapsedMilliseconds: stopWatch.ElapsedMilliseconds));
-            stopWatch.Restart();
+            _movements.AddLast(new Movement(player: player, point: p, elapsedMilliseconds: _stopWatch?.ElapsedMilliseconds ?? 0));
+            _stopWatch = null;
+
+            if (_board.IsWon)
+                _stateMachine.HandleEvent((int)(MovementLastPlayer == PlayerTypes.X ? GameEventes.X_WON : GameEventes.O_WON), new object());
+            else if (_board.IsDraw)
+                _stateMachine.HandleEvent((int)GameEventes.DRAW, new object());
+            else
+                _stateMachine.HandleEvent((int)GameEventes.TO_NEXT_TURN, new object());
         }
         #endregion
 
-
-        #region public Methods
-
+        #region Game Engine Public Methods
         public void DoMove(Point p) => _stateMachine.HandleEvent((int)GameEventes.DO_MOVE, p.Copy());
         public void DoPause() => _stateMachine.HandleEvent((int)GameEventes.PAUSE, new object());
         public void DoUndo() => _stateMachine.HandleEvent((int)GameEventes.UNDO_LAST_MOVE, new object());
         public void DoStartThinking() => _stateMachine.HandleEvent((int)GameEventes.START_THINKING, new object());
-
         #endregion
-
-
-        private void StateMachineInitialize()
-        {
-
-            #region Add Transition Rules
-            //PAUSED
-            _stateMachine.AddTransition((int)GameStates.PAUSED, (int)GameEventes.START_THINKING, (int)GameStates.THINKING, ActionStartThinking);
-            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.PAUSE, (int)GameStates.PAUSED, ActionPause);
-
-            //DO_MOVE
-            _stateMachine.AddTransition((int)GameStates.PAUSED, (int)GameEventes.DO_MOVE, (int)GameStates.THINKING, ActionMove);
-            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.DO_MOVE, (int)GameStates.THINKING, ActionMove);
-
-            //GAME_FINISHED 
-            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.X_WON, (int)GameStates.X_WON, null);
-            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.O_WON, (int)GameStates.O_WON, null);
-            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.DRAW, (int)GameStates.DRAW, null);
-
-            //UNDO_LAST_MOVE
-            _stateMachine.AddTransition((int)GameStates.PAUSED, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.PAUSED, ActionUndoLastMove);
-            _stateMachine.AddTransition((int)GameStates.THINKING, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.PAUSED, ActionUndoLastMove);
-            _stateMachine.AddTransition((int)GameStates.X_WON, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.PAUSED, ActionUndoLastMove);
-            _stateMachine.AddTransition((int)GameStates.O_WON, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.PAUSED, ActionUndoLastMove);
-            _stateMachine.AddTransition((int)GameStates.DRAW, (int)GameEventes.UNDO_LAST_MOVE, (int)GameStates.PAUSED, ActionUndoLastMove);
-            #endregion
-        }
-
-        public Game(int m, int n)
-        {
-            _lengthM = m;
-            _lengthN = n;
-
-            _board = new PlayerTypes[LengthM, LengthN];
-
-            _stateMachine = new(this);
-            StateMachineInitialize();
-
-            //Do predefined first move to the center of board
-            _gameState = GameStates.PAUSED;
-            _stateMachine.HandleEvent((int)GameEventes.DO_MOVE, new Point(LengthM / 2, LengthN / 2));
-        }
-
-
-
-
-        public void StateChange(int endState, Action<object>? action, object arguments)
-        //public void StateChange(int endState, Action<GameActionArgument>? action, GameActionArgument arguments)
-        {
-            _gameState = (GameStates)endState;
-            action?.Invoke(arguments);
-        }
-
-
 
     }
 }
