@@ -8,8 +8,8 @@ namespace TicTacToeGame
 {
     public class PlayerMinMax : IPlayerAI
     {
-        private const int SEARCH_CELL_RANGE = 4;
-        private const int SEARCH_DEPTH = 5;
+        private const int SEARCH_CELL_RANGE = 2;
+        private const int SEARCH_DEPTH = 3;
 
         public PlayerInfo GetPlayerInfo() => new() { AlgorithmName = nameof(PlayerMinMax) };
 
@@ -23,40 +23,52 @@ namespace TicTacToeGame
             return resultData.Point.Copy();
         }
 
-        private void CalculateFitness(TreeNode<MinMaxTreeNodeData> root)
+        private void CalculateFitness(TreeNode<MinMaxTreeNodeData> node)
         {
-            MinMaxTreeNodeData data = root.Data;
+            MinMaxTreeNodeData data = node.Data;
             HashSet<Point> points = new(new PointEqualityComparer());
 
-            if (root.Level <= SEARCH_DEPTH)
+            Board board = data.Board.Copy();
+            PlayerTypes player = data.Player;
+            if (!data.IsMyTurn) player = (player == PlayerTypes.O ? PlayerTypes.X : PlayerTypes.O);
+            if (!node.IsRoot) board[data.Point.M, data.Point.N] = player;
+
+
+
+            if (node.Level < SEARCH_DEPTH)
             {
-                for (int m = 0; m < data.Board.LengthM; m++)
-                    for (int n = 0; n < data.Board.LengthN; n++)
-                        if (data.Board[m, n] != PlayerTypes.EMPTY)
+                for (int m = 0; m < board.LengthM; m++)
+                    for (int n = 0; n < board.LengthN; n++)
+                        if (board[m, n] != PlayerTypes.EMPTY)
                         {
                             for (int i = m - SEARCH_CELL_RANGE; i <= m + SEARCH_CELL_RANGE; i++)
                                 for (int j = n - SEARCH_CELL_RANGE; j <= n + SEARCH_CELL_RANGE; j++)
-                                    if (i >= 0 && j >= 0 && i < data.Board.LengthN && j < data.Board.LengthM && data.Board[i, j] == PlayerTypes.EMPTY)
+                                    if (i >= 0 && j >= 0 && i < board.LengthN && j < board.LengthM && board[i, j] == PlayerTypes.EMPTY)
                                         points.Add(new Point(i, j));
                         }
             }
 
             if (points.Count > 0)
             {
-                Board b = data.Board.Copy();
-                b[data.Point.M, data.Point.N] = data.Player;
-                foreach (Point p in points)
+                Parallel.ForEach(points, (p) =>
                 {
-                    TreeNode<MinMaxTreeNodeData> child = root.AddChild(new MinMaxTreeNodeData(data.Player, p.Copy(), !data.IsMyTurn, b));
+                    TreeNode<MinMaxTreeNodeData> child = node.AddChild(new MinMaxTreeNodeData(data.Player, p.Copy(), !data.IsMyTurn, board));
                     CalculateFitness(child);
-                }
+                });
+                double fitness = node.Children.Max(c => c.Data.FitnessValue);
+                data.FitnessValue = fitness;
             }
             else
             {
-                data.FitnessValue = data.Board.CalculateFintess(data.Point.M, data.Point.N);
+                if (!node.IsRoot)
+                {
+                    double fitness = board.CalculateFintess(data.Point.M, data.Point.N);
+                    //store fitness with Tree level corrections and Enemy coefficient
+                    data.FitnessValue = fitness * (data.IsMyTurn ? 1 : -1) * (100f - node.Level) / 100f;
+                }
             }
 
-            //TODO
+
         }
 
     }

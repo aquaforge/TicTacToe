@@ -10,21 +10,23 @@ namespace TicTacToeGame
             IGame g = new Game(25, 20);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
-            int counter = 0;
+            //int counter = 0;
             //Random rnd = new Random();
 
             while (!g.IsGameFinished())
             {
                 g.DoStartThinking();
-                if (g.MovementsCount() % 2 == 0)
-                {
-                    p = new Point(12, counter);
-                    counter++;
-                }
-                else
-                {
-                    p = new Point(counter, counter);
-                }
+                p = playerMinMax.GetNextMovement(g);
+
+                //if (g.MovementsCount() % 2 == 0)
+                //{
+                //    p = new Point(12, counter);
+                //    counter++;
+                //}
+                //else
+                //{
+                //    p = new Point(counter, counter);
+                //}
                 g.DoMove(p);
 
                 DrawToConsole(g);

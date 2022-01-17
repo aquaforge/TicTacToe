@@ -31,8 +31,8 @@ namespace TicTacToeGame
             return 1000 * (x.M + x.N) - (y.M + y.N);
         }
 
-        static public Point Zero=> new Point(0,0);
-        static public Point MaxPoint=> new Point(int.MaxValue, int.MaxValue);
+        static public Point Zero => new(0, 0);
+        static public Point MaxPoint => new(int.MaxValue, int.MaxValue);
 
     }
 
