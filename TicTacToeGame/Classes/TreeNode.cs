@@ -9,11 +9,11 @@ namespace TicTacToeGame
 {
     public class TreeNode<TData>
     {
-        public TData? Data { get; set; }
+        public TData Data { get; set; }
         public TreeNode<TData>? Parent { get; set; }
         public List<TreeNode<TData>> Children { get; set; } = new();
 
-        public TreeNode(TData? data, TreeNode<TData>? parent)
+        public TreeNode(TData data, TreeNode<TData>? parent)
         {
             Data = data;
             Parent = parent;

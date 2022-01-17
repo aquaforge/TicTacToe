@@ -1,7 +1,7 @@
 ﻿namespace TicTacToeGame
 {
     [Serializable]
-    public enum GameStates
+    public enum GameStates : byte
     {
         NEW_TURN_READY,
         THINKING,

@@ -8,6 +8,8 @@ namespace TicTacToeGame
 {
     public class Board
     {
+        const int FITNESS_VICTORY_VALUE= 100;
+
         private readonly PlayerTypes[,] _board;
 
         private readonly int _lengthM;
@@ -70,7 +72,7 @@ namespace TicTacToeGame
                     _board[m, n] = value;
                     _filledCellsCount++;
                     _lastAffectedCell = new Point(m, n);
-                    CheckIfVictory(m, n);
+                    _isWon = CalculateFintess(m, n) >= FITNESS_VICTORY_VALUE;
                     break;
                 default:
                     break;
@@ -79,13 +81,13 @@ namespace TicTacToeGame
 
         }
 
-        public void CheckIfVictory(int m, int n)
+        internal double CalculateFintess(int m, int n)
         {
-            _isWon = false;
+            double fitness = 0;
             int maxLength;
 
             PlayerTypes player = _board[m, n];
-            if (player == PlayerTypes.EMPTY) return;
+            if (player == PlayerTypes.EMPTY) return 0;
 
 
             //horisontal
@@ -94,11 +96,7 @@ namespace TicTacToeGame
                 if (m + i < _lengthM && _board[m + i, n] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (m - i >= 0 && _board[m - i, n] == player) maxLength++; else break;
-            if (maxLength >= 5)
-            {
-                _isWon = true;
-                return;
-            }
+            fitness += (maxLength >= 5)? FITNESS_VICTORY_VALUE : maxLength;
 
             //vertical
             maxLength = 1;
@@ -106,11 +104,7 @@ namespace TicTacToeGame
                 if (n + i < _lengthN && _board[m, n + i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (n - i >= 0 && _board[m, n - i] == player) maxLength++; else break;
-            if (maxLength >= 5)
-            {
-                _isWon = true;
-                return;
-            }
+            fitness += (maxLength >= 5) ? FITNESS_VICTORY_VALUE : maxLength;
 
             //diagonal \
             maxLength = 1;
@@ -118,27 +112,75 @@ namespace TicTacToeGame
                 if (m + i < _lengthM && n + i < _lengthN && _board[m + i, n + i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (m - i >= 0 && n - i >= 0 && _board[m - i, n - i] == player) maxLength++; else break;
-            if (maxLength >= 5)
-            {
-                _isWon = true;
-                return;
-            }
+            fitness += (maxLength >= 5) ? FITNESS_VICTORY_VALUE : maxLength;
 
             //diagonal /
             maxLength = 1;
             for (int i = 1; i < 5; i++)
-                if (m + i < _lengthM && n - i >=0 && _board[m + i, n - i] == player) maxLength++; else break;
+                if (m + i < _lengthM && n - i >= 0 && _board[m + i, n - i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (m - i >= 0 && n + i >= _lengthN && _board[m - i, n + i] == player) maxLength++; else break;
-            if (maxLength >= 5)
-            {
-                _isWon = true;
-                return;
-            }
+            fitness += (maxLength >= 5) ? FITNESS_VICTORY_VALUE : maxLength;
 
-
-
+            return fitness;
         }
+
+        //public void CheckIfVictory(int m, int n)
+        //{
+        //    _isWon = false;
+        //    int maxLength;
+
+        //    PlayerTypes player = _board[m, n];
+        //    if (player == PlayerTypes.EMPTY) return;
+
+        //    //horisontal
+        //    maxLength = 1;
+        //    for (int i = 1; i < 5; i++)
+        //        if (m + i < _lengthM && _board[m + i, n] == player) maxLength++; else break;
+        //    for (int i = 1; i < 5; i++)
+        //        if (m - i >= 0 && _board[m - i, n] == player) maxLength++; else break;
+        //    if (maxLength >= 5)
+        //    {
+        //        _isWon = true;
+        //        return;
+        //    }
+
+        //    //vertical
+        //    maxLength = 1;
+        //    for (int i = 1; i < 5; i++)
+        //        if (n + i < _lengthN && _board[m, n + i] == player) maxLength++; else break;
+        //    for (int i = 1; i < 5; i++)
+        //        if (n - i >= 0 && _board[m, n - i] == player) maxLength++; else break;
+        //    if (maxLength >= 5)
+        //    {
+        //        _isWon = true;
+        //        return;
+        //    }
+
+        //    //diagonal \
+        //    maxLength = 1;
+        //    for (int i = 1; i < 5; i++)
+        //        if (m + i < _lengthM && n + i < _lengthN && _board[m + i, n + i] == player) maxLength++; else break;
+        //    for (int i = 1; i < 5; i++)
+        //        if (m - i >= 0 && n - i >= 0 && _board[m - i, n - i] == player) maxLength++; else break;
+        //    if (maxLength >= 5)
+        //    {
+        //        _isWon = true;
+        //        return;
+        //    }
+
+        //    //diagonal /
+        //    maxLength = 1;
+        //    for (int i = 1; i < 5; i++)
+        //        if (m + i < _lengthM && n - i >= 0 && _board[m + i, n - i] == player) maxLength++; else break;
+        //    for (int i = 1; i < 5; i++)
+        //        if (m - i >= 0 && n + i >= _lengthN && _board[m - i, n + i] == player) maxLength++; else break;
+        //    if (maxLength >= 5)
+        //    {
+        //        _isWon = true;
+        //        return;
+        //    }
+        //}
 
     }
 }

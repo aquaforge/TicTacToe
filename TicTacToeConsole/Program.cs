@@ -11,7 +11,7 @@ namespace TicTacToeGame
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             int counter = 0;
-            Random rand = new Random();
+            //Random rnd = new Random();
 
             while (!g.IsGameFinished())
             {
