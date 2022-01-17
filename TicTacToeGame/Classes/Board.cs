@@ -89,7 +89,7 @@ namespace TicTacToeGame
 
 
             //horisontal
-            maxLength = 0;
+            maxLength = 1;
             for (int i = 1; i < 5; i++)
                 if (m + i < _lengthM && _board[m + i, n] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
@@ -101,7 +101,7 @@ namespace TicTacToeGame
             }
 
             //vertical
-            maxLength = 0;
+            maxLength = 1;
             for (int i = 1; i < 5; i++)
                 if (n + i < _lengthN && _board[m, n + i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
@@ -113,7 +113,7 @@ namespace TicTacToeGame
             }
 
             //diagonal \
-            maxLength = 0;
+            maxLength = 1;
             for (int i = 1; i < 5; i++)
                 if (m + i < _lengthM && n + i < _lengthN && _board[m + i, n + i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
@@ -125,7 +125,7 @@ namespace TicTacToeGame
             }
 
             //diagonal /
-            maxLength = 0;
+            maxLength = 1;
             for (int i = 1; i < 5; i++)
                 if (m + i < _lengthM && n - i >=0 && _board[m + i, n - i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)

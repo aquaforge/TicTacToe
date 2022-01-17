@@ -6,25 +6,28 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
-
-            Game g = new(25, 20);
+            Point p;
+            IGame g = new Game(25, 20);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             int counter = 0;
             Random rand = new Random();
 
-
-            while (g.GameState !=GameStates.X_WON && g.GameState != GameStates.O_WON && g.GameState != GameStates.DRAW)
+            while (!g.IsGameFinished())
             {
                 g.DoStartThinking();
-                g.DoMove(new Point(5, counter));
-
-                g.DoStartThinking();
-                g.DoMove(new Point(6, counter));
-                counter++;
+                if (g.MovementsCount() % 2 == 0)
+                {
+                    p = new Point(12, counter);
+                    counter++;
+                }
+                else
+                {
+                    p = new Point(counter, counter);
+                }
+                g.DoMove(p);
 
                 DrawToConsole(g);
-
                 Console.ReadKey();
             }
 
@@ -43,7 +46,7 @@ namespace TicTacToeGame
             }
             Console.ResetColor();
             Console.WriteLine();
-            
+
 
             //Draw Matrix
             Point MovementLastCell = g.MovementLastCell;

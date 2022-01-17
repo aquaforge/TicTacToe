@@ -21,5 +21,6 @@
 
         public List<Movement> MovementsGetTop(int top);
         public int MovementsCount();
+        public bool IsGameFinished();
     }
 }

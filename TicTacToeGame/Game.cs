@@ -38,6 +38,8 @@ namespace TicTacToeGame
         public Point MovementLastCell => _movements.MovementLastCell;
         public List<Movement> MovementsGetTop(int top = 0) => _movements.MovementsGetTop(top);
         public int MovementsCount() => _movements.Count;
+        public bool IsGameFinished() => _gameState == GameStates.X_WON || _gameState == GameStates.O_WON || _gameState == GameStates.DRAW;
+
 
 
 
