@@ -36,8 +36,8 @@ namespace TicTacToeGame
         public PlayerTypes PlayerToMove => _movements.PlayerToMove;
         public PlayerTypes MovementLastPlayer => _movements.MovementLastPlayer;
         public Point MovementLastCell => _movements.MovementLastCell;
-        public List<Movement> MovementsGetTop => _movements.MovementsGetTop();
-        public int MovementsCount => _movements.Count;
+        public List<Movement> MovementsGetTop(int top = 0) => _movements.MovementsGetTop(top);
+        public int MovementsCount() => _movements.Count;
 
 
 

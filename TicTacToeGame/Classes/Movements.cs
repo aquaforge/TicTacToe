@@ -39,7 +39,7 @@ namespace TicTacToeGame
         public List<Movement> MovementsGetTop(int top = 0)
         {
             List<Movement> result = _movements.ToList();
-            if (top == 0 && result.Count <= top) return result;
+            if (top == 0 || result.Count <= top) return result;
             return result.GetRange(result.Count - top, top);
         }
 

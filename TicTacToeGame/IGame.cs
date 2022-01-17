@@ -18,5 +18,8 @@
         void DoPause();
         void DoStartThinking();
         void DoUndo();
+
+        public List<Movement> MovementsGetTop(int top);
+        public int MovementsCount();
     }
 }
