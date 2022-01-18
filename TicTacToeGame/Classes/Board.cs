@@ -34,22 +34,53 @@ namespace TicTacToeGame
         public bool IsDraw => EmptyCellsCount == 0 && !IsWon;
 
 
-        public Board(int m, int n)
+        public Board(int row, int col)
         {
-            _lengthRow = m;
-            _lengthCol = n;
+            _lengthRow = row;
+            _lengthCol = col;
             _board = new PlayerTypes[_lengthRow, _lengthCol];
         }
 
         public Board Copy() => Board.Copy(this);
 
+        public static Board CreateExactPosition(string[] matrix, Point lastAffectedCell)
+        {
+            Board board = new(matrix.Length, matrix[0].Length);
+
+            for (int i = 1; i < board.LengthRow; i++)
+                if (matrix[0].Length != matrix[i].Length) throw new ArgumentException($"Wrong matrix dimention [_,{i}]:{matrix[i].Length}");
+
+            for (int row = 0; row < board.LengthRow; row++)
+            {
+                char[] chars = matrix[row].ToCharArray();
+                for (int col = 0; col < board.LengthCol; col++)
+                {
+                    if (chars[col] == ' ')
+                        board[row, col] = PlayerTypes.EMPTY;
+                    else
+                        board[row, col] = (PlayerTypes)Enum.Parse(typeof(PlayerTypes), chars[col].ToString(), true);
+                }
+            }
+
+            int _filledCellsCount = 0;
+            for (int row = 1; row < board._lengthRow; row++)
+                for (int col = 1; col < board._lengthCol; col++)
+                    if (board._board[row, col] != PlayerTypes.EMPTY) _filledCellsCount++;
+
+            board._lastAffectedCell = lastAffectedCell;
+            board._isWon = board.IsVictory(lastAffectedCell.Row, lastAffectedCell.Col);
+
+            return board;
+        }
+
+
         public static Board Copy(Board b)
         {
             Board result = new(b.LengthRow, b.LengthCol);
 
-            for (int m = 0; m < b.LengthRow; m++)
-                for (int n = 0; n < b.LengthCol; n++)
-                    result._board[m, n] = b[m, n];
+            for (int row = 0; row < b.LengthRow; row++)
+                for (int col = 0; col < b.LengthCol; col++)
+                    result._board[row, col] = b[row, col];
 
             result._isWon = b.IsWon;
             result._lastAffectedCell = b.LastAffectedCell?.Copy();
@@ -59,38 +90,38 @@ namespace TicTacToeGame
 
         }
 
-        public PlayerTypes this[int m, int n]
+        public PlayerTypes this[int row, int col]
         {
-            get { return _board[m, n]; }
-            set { SetCellValue(m, n, value); }
+            get { return _board[row, col]; }
+            set { SetCellValue(row, col, value); }
         }
 
-        private void SetCellValue(int m, int n, PlayerTypes value)
+
+
+
+        private void SetCellValue(int row, int col, PlayerTypes value)
         {
-            if (_board[m, n] == value) return;
+            if (_board[row, col] == value) return;
 
             switch (value)
             {
                 case PlayerTypes.EMPTY:
-                    _board[m, n] = value;
+                    _board[row, col] = value;
                     _filledCellsCount--;
                     _lastAffectedCell = null;
                     break;
                 case PlayerTypes.X:
                 case PlayerTypes.O:
-                    if (_board[m, n] != PlayerTypes.EMPTY) throw new ArgumentException("X and O cannot be replaced");
-                    _board[m, n] = value;
+                    if (_board[row, col] != PlayerTypes.EMPTY) throw new ArgumentException("X and O cannot be replaced");
+                    _board[row, col] = value;
                     _filledCellsCount++;
-                    _lastAffectedCell = new Point(m, n);
-                    _isWon = IsVictory(m, n);
+                    _lastAffectedCell = new Point(row, col);
+                    _isWon = IsVictory(row, col);
                     break;
                 default:
                     break;
             }
         }
-
-
-
 
         public bool IsVictory(int m, int n)
         {
@@ -105,7 +136,7 @@ namespace TicTacToeGame
                 if (m + i < _lengthRow && _board[m + i, n] == player) maxLength++; else break;
             for (int i = 1; i < WIN_LENGTH; i++)
                 if (m - i >= 0 && _board[m - i, n] == player) maxLength++; else break;
-            if (maxLength >= WIN_LENGTH) 
+            if (maxLength >= WIN_LENGTH)
                 return true;
 
             //vertical
@@ -114,7 +145,7 @@ namespace TicTacToeGame
                 if (n + i < _lengthCol && _board[m, n + i] == player) maxLength++; else break;
             for (int i = 1; i < WIN_LENGTH; i++)
                 if (n - i >= 0 && _board[m, n - i] == player) maxLength++; else break;
-            if (maxLength >= WIN_LENGTH) 
+            if (maxLength >= WIN_LENGTH)
                 return true;
 
             //diagonal \
@@ -141,6 +172,23 @@ namespace TicTacToeGame
         public bool IsInRange(int m, int n) => m >= 0 && n >= 0 && m < _lengthRow && n < _lengthCol;
         public bool IsInRange(Point p) => IsInRange(p.Row, p.Col);
 
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"WON={IsWon} DRAW={IsDraw}");
+            if (_lastAffectedCell != null) sb.Append($" LAST_MOVE={_lastAffectedCell}");
+
+            for (int row = 0; row < _lengthRow; row++)
+            {
+                sb.Append('|');
+                for (int col = 0; col < _lengthCol; col++)
+                    sb.Append(_board[row, col].ToString());
+            }
+
+            return sb.ToString();
+        }
 
     }
 }

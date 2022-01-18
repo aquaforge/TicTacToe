@@ -10,6 +10,7 @@ namespace TicTacToeGame
     {
         public PlayerInfo GetPlayerInfo();
         public Point GetNextMovement(IGame g);
+        public Point GetNextMovement(Board board, PlayerTypes playerToMove);
 
     }
 }

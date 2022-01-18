@@ -9,10 +9,10 @@ namespace TicTacToeGame
     public class PlayerMinMax : IPlayerAI
     {
 
-        private const int SEARCH_CELL_RANGE = 2;
-        private const int SEARCH_DEPTH = 3;
+         const int SEARCH_CELL_RANGE = 2;
+         const int SEARCH_DEPTH = 3;
 
-        private readonly Point[] directions = {
+         static Point[] directions = {
                 new Point(1, 0), new Point(-1, 0),
                 new Point(0, 1), new Point(0, -1),
                 new Point(1, 1), new Point(1, -1),
@@ -22,27 +22,32 @@ namespace TicTacToeGame
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         CancellationToken token;
 
-        Random random = new Random();
+        readonly Random random = new Random();
 
         public PlayerInfo GetPlayerInfo() => new() { AlgorithmName = nameof(PlayerMinMax) };
 
-        public Point GetNextMovement(IGame g)
+
+        public Point GetNextMovement(IGame g) => GetNextMovement(g.Board, g.PlayerToMove);
+        public Point GetNextMovement(Board board, PlayerTypes playerToMove)
+
         {
             token = cancelTokenSource.Token;
             //cancelTokenSource.Cancel();
             //if (token.IsCancellationRequested) {}
 
 
-            TreeNode<MinMaxTreeNodeData> root = new(new MinMaxTreeNodeData(g.PlayerToMove, Point.MaxPoint, false, g.Board), null);
+            TreeNode<MinMaxTreeNodeData> root = new(new MinMaxTreeNodeData(playerToMove, Point.MaxPoint, false, board.Copy()), null);
             CalculateFitness(root);
 
 
-            string s = Environment.NewLine;
-            foreach (var item in root.Children.OrderByDescending(d => d.Data?.FitnessValue).Select(dd => dd.Data))
-            {
-                s += item.ToString() + Environment.NewLine;
-            }
-            GeneralFileLogger.Log(s);
+            //string s = Environment.NewLine;
+            //foreach (var item in root.Children.OrderByDescending(d => d.Data?.FitnessValue).Select(dd => dd.Data))
+            //{
+            //    s += item.ToString() + Environment.NewLine;
+            //}
+            //GeneralFileLogger.Log(s);
+            GeneralFileLogger.Log(new Tree<MinMaxTreeNodeData>(root).ToString());
+
 
             double fitnessValue = root.Children.Max(d => d.Data.FitnessValue);
             MinMaxTreeNodeData resultData = root.Children
@@ -93,7 +98,8 @@ namespace TicTacToeGame
                 if (board.IsWon)
                 {
                     data.FitnessValue = (data.IsMyTurn ? 1 : -1) * (Board.FITNESS_VICTORY_VALUE - node.Level);
-                    GeneralFileLogger.Log(node.Level + " isWon " + data.ToString());
+                    //if (data.FitnessValue < 0) 
+                    //    GeneralFileLogger.Log(node.Level + " isWon " + data.ToString());
                     return;
                 }
             }
@@ -122,21 +128,10 @@ namespace TicTacToeGame
             }
             //); Task.FromResult(parallelResult).Wait();
 
-            if (data.IsMyTurn)
+            if (!data.IsMyTurn)
                 data.FitnessValue = node.Children.Max(n => n.Data.FitnessValue);
             else
                 data.FitnessValue = node.Children.Min(n => n.Data.FitnessValue);
-
-            if (data.FitnessValue != 0) GeneralFileLogger.Log(node.Level + " " + data.ToString());
-
-            //fitness = node.Children.Max(c => c.Data.FitnessValue);
-            //data.FitnessValue += fitness;
-
-            //    else
-            //    fitness = CalculateFintess(board, data.Point.Row, data.Point.Col, SEARCH_CELL_RANGE);
-            //data.FitnessValue = fitness * (100f - node.Level) / 100f * (data.IsMyTurn ? 1 : -1);
-            //if (board.IsWon) return;
-
 
         }
 

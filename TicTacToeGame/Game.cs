@@ -28,7 +28,7 @@ namespace TicTacToeGame
         public Board Board => _board.Copy();
         public int LengthRow { get => _board.LengthRow; }
         public int LengthCol { get => _board.LengthCol; }
-        public PlayerTypes this[int m, int n] => _board[m, n];
+        public PlayerTypes this[int row, int col] => _board[row, col];
         #endregion
 
         public int FilledCellsCount => _board.FilledCellsCount;
@@ -44,7 +44,7 @@ namespace TicTacToeGame
 
 
 
-        public Game(int row, int col)
+        public Game(byte row, byte col)
         {
             _board = new(row, col);
 

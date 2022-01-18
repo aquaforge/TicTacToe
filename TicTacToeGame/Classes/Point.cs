@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TicTacToeGame
 {
     [Serializable]
-    public class Point : IComparer<Point>
+    public class Point : IComparer<Point>, ICloneable, IComparable<Point>
     {
         public int Row;
         public int Col;
@@ -18,9 +18,13 @@ namespace TicTacToeGame
             Col = col;
         }
 
-        public override string ToString() => $"[{Row,2},{Col,2}]";
 
-        public Point Copy() => new(Row, Col);
+
+        public override string ToString() => $"[{Row,2},{Col,2}]";
+        public Point Copy() => new Point(Row, Col);
+
+        object ICloneable.Clone() => MemberwiseClone();
+
 
         public int Compare(Point? row, Point? col)
         {
@@ -31,8 +35,11 @@ namespace TicTacToeGame
             return 1000 * (row.Row + row.Col) - (col.Row + col.Col);
         }
 
+        public int CompareTo(Point? other) => Compare(this, other);
+
+
         static public Point Zero => new(0, 0);
-        static public Point MaxPoint => new(int.MaxValue, int.MaxValue);
+        static public Point MaxPoint => new(byte.MaxValue, byte.MaxValue);
 
     }
 
