@@ -18,12 +18,13 @@ namespace TicTacToeGame.Tests
                 " oooo",
                 new string(' ', 5),
                  }, new Point(1, 1));
-
             IPlayerAI playerMinMax = new PlayerMinMax();
-
             PlayerTypes player = PlayerTypes.O;
-            Point p = playerMinMax.GetNextMovement(board, player);
-            Assert.AreEqual<Point>(p, new Point(0, 0));
+            Point actual = playerMinMax.GetNextMovement(board, player);
+
+            Point expected = new (0, 0);
+
+            Assert.AreEqual<Point>(expected,actual);
         }
     }
 }
