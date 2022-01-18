@@ -9,16 +9,9 @@ namespace TicTacToeGame
     public class Board
     {
 
-        Point[] directions = {
-                new Point(1, 0), new Point(-1, 0),
-                new Point(0, 1), new Point(0, -1),
-                new Point(1, 1), new Point(1, -1),
-                new Point(-1, 1), new Point(-1, -1)
-            };
 
 
-        public const int FITNESS_VICTORY_VALUE = 1000;
-        private const int SEARCH_CELL_RANGE = 4;
+        public const int FITNESS_VICTORY_VALUE = 10000;
         private const int WIN_LENGTH = 5;
 
         private readonly PlayerTypes[,] _board;
@@ -53,9 +46,15 @@ namespace TicTacToeGame
         public static Board Copy(Board b)
         {
             Board result = new(b.LengthRow, b.LengthCol);
+
             for (int m = 0; m < b.LengthRow; m++)
                 for (int n = 0; n < b.LengthCol; n++)
-                    result[m, n] = b[m, n];
+                    result._board[m, n] = b[m, n];
+
+            result._isWon = b.IsWon;
+            result._lastAffectedCell = b.LastAffectedCell?.Copy();
+            result._filledCellsCount = b.FilledCellsCount;
+
             return result;
 
         }
@@ -91,29 +90,7 @@ namespace TicTacToeGame
         }
 
 
-        public double CalculateFintess(int m, int n, int searchRange)
-        {
 
-            PlayerTypes player = _board[m, n];
-            if (player == PlayerTypes.EMPTY) return 0;
-
-            if (searchRange < 1) searchRange = 1;
-
-            double fitness = 0;
-            for (int i = 1; i < searchRange; i++)
-                foreach (Point direction in directions)
-                {
-                    Point p = new(m + i * direction.Row, n + i * direction.Col);
-                    if (IsInRange(p))
-                    {
-                        if (_board[p.Row, p.Col] == player)
-                            fitness += 2f * (1 + searchRange - i) / searchRange;
-                        else if (_board[p.Row, p.Col] == PlayerTypes.EMPTY)
-                            fitness += 1f * (1 + searchRange - i) / searchRange;
-                    }
-                }
-            return fitness;
-        }
 
         public bool IsVictory(int m, int n)
         {
@@ -124,37 +101,37 @@ namespace TicTacToeGame
 
             //horisontal
             maxLength = 1;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (m + i < _lengthRow && _board[m + i, n] == player) maxLength++; else break;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (m - i >= 0 && _board[m - i, n] == player) maxLength++; else break;
-            if (maxLength >= 5) 
+            if (maxLength >= WIN_LENGTH) 
                 return true;
 
             //vertical
             maxLength = 1;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (n + i < _lengthCol && _board[m, n + i] == player) maxLength++; else break;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (n - i >= 0 && _board[m, n - i] == player) maxLength++; else break;
-            if (maxLength >= 5) 
+            if (maxLength >= WIN_LENGTH) 
                 return true;
 
             //diagonal \
             maxLength = 1;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (m + i < _lengthRow && n + i < _lengthCol && _board[m + i, n + i] == player) maxLength++; else break;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (m - i >= 0 && n - i >= 0 && _board[m - i, n - i] == player) maxLength++; else break;
-            if (maxLength >= 5) return true;
+            if (maxLength >= WIN_LENGTH) return true;
 
             //diagonal /
             maxLength = 1;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (m + i < _lengthRow && n - i >= 0 && _board[m + i, n - i] == player) maxLength++; else break;
-            for (int i = 1; i < 5; i++)
+            for (int i = 1; i < WIN_LENGTH; i++)
                 if (m - i >= 0 && n + i < _lengthCol && _board[m - i, n + i] == player) maxLength++; else break;
-            if (maxLength >= 5) return true;
+            if (maxLength >= WIN_LENGTH) return true;
 
             return false;
 
