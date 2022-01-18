@@ -8,7 +8,7 @@ namespace TicTacToeGame
 {
     public class Board
     {
-        const int FITNESS_VICTORY_VALUE = 1000;
+        public const int FITNESS_VICTORY_VALUE = 1000;
         private const int SEARCH_CELL_RANGE = 4;
 
         private readonly PlayerTypes[,] _board;
@@ -80,21 +80,21 @@ namespace TicTacToeGame
             }
         }
 
-        internal double CalculateFintess(int m, int n)
+
+        public double CalculateFintess(int m, int n, int searchRange)
         {
 
             PlayerTypes player = _board[m, n];
             if (player == PlayerTypes.EMPTY) return 0;
 
-            if (IsVictory(m, n)) return FITNESS_VICTORY_VALUE;
+            if (searchRange < 1) searchRange = 1;
 
             int count = 0;
-            for (int i = m - SEARCH_CELL_RANGE; i <= m + SEARCH_CELL_RANGE; i++)
-                for (int j = n - SEARCH_CELL_RANGE; j <= n + SEARCH_CELL_RANGE; j++)
+            //number of filled by player cells nearby
+            for (int i = m - searchRange; i <= m + searchRange; i++)
+                for (int j = n - searchRange; j <= n + searchRange; j++)
                     if (i >= 0 && j >= 0 && i < _lengthM && j < _lengthN && _board[i, j] == player)
                         count++;
-
-            //Fitness are IsVictory + number of filled by player cells nearby
             return count;
         }
 
@@ -134,7 +134,7 @@ namespace TicTacToeGame
             for (int i = 1; i < 5; i++)
                 if (m + i < _lengthM && n - i >= 0 && _board[m + i, n - i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
-                if (m - i >= 0 && n + i >= _lengthN && _board[m - i, n + i] == player) maxLength++; else break;
+                if (m - i >= 0 && n + i < _lengthN && _board[m - i, n + i] == player) maxLength++; else break;
             if (maxLength >= 5) return true;
 
             return false;

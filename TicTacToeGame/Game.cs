@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame;
 
 namespace TicTacToeGame
 {
@@ -61,6 +62,7 @@ namespace TicTacToeGame
         public void StateChange(int endState, Action<object>? action, object arguments)
         {
             _gameState = (GameStates)endState;
+            GeneralFileLogger.Log($"STATE: {_gameState} {arguments}");
             action?.Invoke(arguments);
         }
 

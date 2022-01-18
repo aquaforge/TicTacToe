@@ -6,35 +6,16 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
-            Point p;
-            IGame g = new Game(25, 20);
+            IGame g = new Game(15, 10);
             IPlayerAI playerMinMax = new PlayerMinMax();
-
-            //int counter = 0;
-            //Random rnd = new Random();
 
             while (!g.IsGameFinished())
             {
                 g.DoStartThinking();
-                p = playerMinMax.GetNextMovement(g);
-
-                //if (g.MovementsCount() % 2 == 0)
-                //{
-                //    p = new Point(12, counter);
-                //    counter++;
-                //}
-                //else
-                //{
-                //    p = new Point(counter, counter);
-                //}
-                g.DoMove(p);
-
+                g.DoMove(playerMinMax.GetNextMovement(g));
                 DrawToConsole(g);
-                //Console.ReadKey();
             }
-
         }
-
 
         private static void DrawToConsole(IGame g)
         {
