@@ -41,7 +41,7 @@ namespace TicTacToeGame
             //ShuffleSort = (byte)rnd.Next(255);
         }
 
-        public override string ToString() => $"{Player} {Point} {FitnessValue}";
+        public override string ToString() => $"{Player} {Point} {FitnessValue:0.##}";
 
     }
 }

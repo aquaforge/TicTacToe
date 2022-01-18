@@ -89,13 +89,13 @@ namespace TicTacToeGame
 
             if (searchRange < 1) searchRange = 1;
 
-            int count = 0;
+            double fitness = 0;
             //number of filled by player cells nearby
             for (int i = m - searchRange; i <= m + searchRange; i++)
                 for (int j = n - searchRange; j <= n + searchRange; j++)
                     if (i >= 0 && j >= 0 && i < _lengthM && j < _lengthN && _board[i, j] == player)
-                        count++;
-            return count;
+                        fitness += 2 - (Math.Abs(m - i) + Math.Abs(n - j)) / (2f * searchRange);
+            return fitness;
         }
 
         public bool IsVictory(int m, int n)

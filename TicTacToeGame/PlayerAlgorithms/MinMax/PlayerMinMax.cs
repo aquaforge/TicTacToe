@@ -28,10 +28,13 @@ namespace TicTacToeGame
             CalculateFitness(root);
 
 
-            string s = "";
+            string s = Environment.NewLine;
             foreach (var item in root.Children.OrderByDescending(d => d.Data?.FitnessValue).Select(dd => dd.Data))
-                s += $"[{item.ToString()}] ";
+            {
+                s += item.ToString() + Environment.NewLine;
+            }
             GeneralFileLogger.Log(s);
+            //GeneralFileLogger.Log(new Tree<MinMaxTreeNodeData>(root).ToString());
 
             MinMaxTreeNodeData? resultData = root.Children.OrderByDescending(d => d.Data?.FitnessValue).Select(dd => dd.Data).FirstOrDefault();
             if (resultData == null) throw new Exception("resultData is  null");

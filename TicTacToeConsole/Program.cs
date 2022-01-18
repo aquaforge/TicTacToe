@@ -6,7 +6,7 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
-            IGame g = new Game(15, 10);
+            IGame g = new Game(6, 5);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())
@@ -21,12 +21,10 @@ namespace TicTacToeGame
         {
             //Header
             Console.Clear();
-            Console.Write("   ");
+            Console.Write(new string(' ',3));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             for (int m = 0; m < g.LengthM; m++)
-            {
                 Console.Write($"{m,2} ");
-            }
             Console.ResetColor();
             Console.WriteLine();
 
@@ -63,6 +61,7 @@ namespace TicTacToeGame
                 Console.WriteLine();
             }
 
+            //Draw Info
             Console.WriteLine(g.GameState.ToString().ToLower() + " " + g.MovementsCount());
             List<Movement> movements = g.MovementsGetTop(5);
             for (int i = movements.Count - 1; i >= 0; i--)
