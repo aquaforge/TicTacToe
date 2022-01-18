@@ -6,7 +6,7 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
-            IGame g = new Game(6, 5);
+            IGame g = new Game(10, 15);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())
@@ -14,6 +14,7 @@ namespace TicTacToeGame
                 g.DoStartThinking();
                 g.DoMove(playerMinMax.GetNextMovement(g));
                 DrawToConsole(g);
+                Thread.Sleep(100);
             }
         }
 
@@ -23,24 +24,24 @@ namespace TicTacToeGame
             Console.Clear();
             Console.Write(new string(' ',3));
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            for (int m = 0; m < g.LengthM; m++)
-                Console.Write($"{m,2} ");
+            for (int col = 0; col < g.LengthCol; col++)
+                Console.Write($"{col,2} ");
             Console.ResetColor();
             Console.WriteLine();
 
 
             //Draw Matrix
             Point MovementLastCell = g.MovementLastCell;
-            for (int n = 0; n < g.LengthN; n++)
+            for (int row = 0; row < g.LengthRow; row++)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($"{n,2} ");
+                Console.Write($"{row,2} ");
                 Console.ResetColor();
 
-                for (int m = 0; m < g.LengthM; m++)
+                for (int col = 0; col < g.LengthCol; col++)
                 {
                     string s = "_";
-                    switch (g[m, n])
+                    switch (g[row, col])
                     {
                         case PlayerTypes.X:
                             s = "X";
@@ -52,7 +53,7 @@ namespace TicTacToeGame
                             break;
                     }
                     Console.Write(" ");
-                    if (MovementLastCell.M == m && MovementLastCell.N == n)
+                    if (MovementLastCell.Row == row && MovementLastCell.Col == col)
                         Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write(s);
                     Console.ResetColor();

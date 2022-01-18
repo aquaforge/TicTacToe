@@ -26,8 +26,8 @@ namespace TicTacToeGame
         #region Board
         private readonly Board _board;
         public Board Board => _board.Copy();
-        public int LengthM { get => _board.LengthM; }
-        public int LengthN { get => _board.LengthN; }
+        public int LengthRow { get => _board.LengthRow; }
+        public int LengthCol { get => _board.LengthCol; }
         public PlayerTypes this[int m, int n] => _board[m, n];
         #endregion
 
@@ -44,16 +44,16 @@ namespace TicTacToeGame
 
 
 
-        public Game(int m, int n)
+        public Game(int row, int col)
         {
-            _board = new(m, n);
+            _board = new(row, col);
 
             _stateMachine = new(this);
             StateMachineInitialize();
 
             //Do predefined first move to the center of board
             _stateMachine.HandleEvent((int)GameEventes.START_THINKING, new object());
-            _stateMachine.HandleEvent((int)GameEventes.DO_MOVE, new Point(LengthM / 2, LengthN / 2));
+            _stateMachine.HandleEvent((int)GameEventes.DO_MOVE, new Point(LengthRow / 2, LengthCol / 2));
         }
 
 
@@ -108,7 +108,7 @@ namespace TicTacToeGame
         {
             if (_movements.Count == 0) return;
             Point point = MovementLastCell;
-            _board[point.M, point.N] = PlayerTypes.EMPTY;
+            _board[point.Row, point.Col] = PlayerTypes.EMPTY;
             _movements.RemoveLast();
         }
 
@@ -116,10 +116,10 @@ namespace TicTacToeGame
         {
             if (o is not Point p) throw new ArgumentNullException("ActionMove");
 
-            if (_board[p.M, p.N] != PlayerTypes.EMPTY) throw new ArgumentException($"{p} already filled in");
+            if (_board[p.Row, p.Col] != PlayerTypes.EMPTY) throw new ArgumentException($"{p} already filled in");
 
             PlayerTypes player = PlayerToMove;
-            _board[p.M, p.N] = player;
+            _board[p.Row, p.Col] = player;
             _movements.AddLast(new Movement(player: player, point: p, elapsedMilliseconds: _stopWatch?.ElapsedMilliseconds ?? 0));
             _stopWatch = null;
 

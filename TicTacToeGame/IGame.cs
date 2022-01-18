@@ -10,8 +10,8 @@
         GameStates GameState { get; }
         Point MovementLastCell { get; }
         PlayerTypes MovementLastPlayer { get; }
-        int LengthM { get; }
-        int LengthN { get; }
+        int LengthRow { get; }
+        int LengthCol { get; }
         PlayerTypes PlayerToMove { get; }
 
         void DoMove(Point p);

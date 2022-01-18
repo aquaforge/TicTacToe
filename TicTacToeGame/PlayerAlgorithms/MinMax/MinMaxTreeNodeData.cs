@@ -29,7 +29,7 @@ namespace TicTacToeGame
             }
         }
 
-        public MinMaxTreeNodeData(PlayerTypes player, Point point, bool isMyTurn, Board board, Random? rnd = null, double fitnessValue = 0)
+        public MinMaxTreeNodeData(PlayerTypes player, Point point, bool isMyTurn, Board board, Random? random = null, double fitnessValue = 0)
         {
             Player = player;
             Point = point;
@@ -37,8 +37,7 @@ namespace TicTacToeGame
             FitnessValue = fitnessValue;
             Board = board;
 
-            //if (rnd == null) rnd = new Random();
-            //ShuffleSort = (byte)rnd.Next(255);
+            if (random != null) ShuffleSort = (byte)random.Next(255);
         }
 
         public override string ToString() => $"{Player} {Point} {FitnessValue:0.##}";

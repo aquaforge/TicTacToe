@@ -8,22 +8,32 @@ namespace TicTacToeGame
 {
     public class Board
     {
+
+        Point[] directions = {
+                new Point(1, 0), new Point(-1, 0),
+                new Point(0, 1), new Point(0, -1),
+                new Point(1, 1), new Point(1, -1),
+                new Point(-1, 1), new Point(-1, -1)
+            };
+
+
         public const int FITNESS_VICTORY_VALUE = 1000;
         private const int SEARCH_CELL_RANGE = 4;
+        private const int WIN_LENGTH = 5;
 
         private readonly PlayerTypes[,] _board;
 
-        private readonly int _lengthM;
-        private readonly int _lengthN;
-        public int LengthM { get => _lengthM; }
-        public int LengthN { get => _lengthN; }
+        private readonly int _lengthRow;
+        private readonly int _lengthCol;
+        public int LengthRow { get => _lengthRow; }
+        public int LengthCol { get => _lengthCol; }
 
         private Point? _lastAffectedCell;
         public Point? LastAffectedCell => _lastAffectedCell;
 
         private int _filledCellsCount = 0;
         public int FilledCellsCount { get => _filledCellsCount; }
-        public int EmptyCellsCount { get => _lengthM * _lengthN - _filledCellsCount; }
+        public int EmptyCellsCount { get => _lengthRow * _lengthCol - _filledCellsCount; }
 
 
         private bool _isWon = false;
@@ -33,18 +43,18 @@ namespace TicTacToeGame
 
         public Board(int m, int n)
         {
-            _lengthM = m;
-            _lengthN = n;
-            _board = new PlayerTypes[LengthM, LengthN];
+            _lengthRow = m;
+            _lengthCol = n;
+            _board = new PlayerTypes[_lengthRow, _lengthCol];
         }
 
         public Board Copy() => Board.Copy(this);
 
         public static Board Copy(Board b)
         {
-            Board result = new(b.LengthM, b.LengthN);
-            for (int m = 0; m < b.LengthM; m++)
-                for (int n = 0; n < b.LengthN; n++)
+            Board result = new(b.LengthRow, b.LengthCol);
+            for (int m = 0; m < b.LengthRow; m++)
+                for (int n = 0; n < b.LengthCol; n++)
                     result[m, n] = b[m, n];
             return result;
 
@@ -90,11 +100,18 @@ namespace TicTacToeGame
             if (searchRange < 1) searchRange = 1;
 
             double fitness = 0;
-            //number of filled by player cells nearby
-            for (int i = m - searchRange; i <= m + searchRange; i++)
-                for (int j = n - searchRange; j <= n + searchRange; j++)
-                    if (i >= 0 && j >= 0 && i < _lengthM && j < _lengthN && _board[i, j] == player)
-                        fitness += 2 - (Math.Abs(m - i) + Math.Abs(n - j)) / (2f * searchRange);
+            for (int i = 1; i < searchRange; i++)
+                foreach (Point direction in directions)
+                {
+                    Point p = new(m + i * direction.Row, n + i * direction.Col);
+                    if (IsInRange(p))
+                    {
+                        if (_board[p.Row, p.Col] == player)
+                            fitness += 2f * (1 + searchRange - i) / searchRange;
+                        else if (_board[p.Row, p.Col] == PlayerTypes.EMPTY)
+                            fitness += 1f * (1 + searchRange - i) / searchRange;
+                    }
+                }
             return fitness;
         }
 
@@ -108,23 +125,25 @@ namespace TicTacToeGame
             //horisontal
             maxLength = 1;
             for (int i = 1; i < 5; i++)
-                if (m + i < _lengthM && _board[m + i, n] == player) maxLength++; else break;
+                if (m + i < _lengthRow && _board[m + i, n] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (m - i >= 0 && _board[m - i, n] == player) maxLength++; else break;
-            if (maxLength >= 5) return true;
+            if (maxLength >= 5) 
+                return true;
 
             //vertical
             maxLength = 1;
             for (int i = 1; i < 5; i++)
-                if (n + i < _lengthN && _board[m, n + i] == player) maxLength++; else break;
+                if (n + i < _lengthCol && _board[m, n + i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (n - i >= 0 && _board[m, n - i] == player) maxLength++; else break;
-            if (maxLength >= 5) return true;
+            if (maxLength >= 5) 
+                return true;
 
             //diagonal \
             maxLength = 1;
             for (int i = 1; i < 5; i++)
-                if (m + i < _lengthM && n + i < _lengthN && _board[m + i, n + i] == player) maxLength++; else break;
+                if (m + i < _lengthRow && n + i < _lengthCol && _board[m + i, n + i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
                 if (m - i >= 0 && n - i >= 0 && _board[m - i, n - i] == player) maxLength++; else break;
             if (maxLength >= 5) return true;
@@ -132,13 +151,19 @@ namespace TicTacToeGame
             //diagonal /
             maxLength = 1;
             for (int i = 1; i < 5; i++)
-                if (m + i < _lengthM && n - i >= 0 && _board[m + i, n - i] == player) maxLength++; else break;
+                if (m + i < _lengthRow && n - i >= 0 && _board[m + i, n - i] == player) maxLength++; else break;
             for (int i = 1; i < 5; i++)
-                if (m - i >= 0 && n + i < _lengthN && _board[m - i, n + i] == player) maxLength++; else break;
+                if (m - i >= 0 && n + i < _lengthCol && _board[m - i, n + i] == player) maxLength++; else break;
             if (maxLength >= 5) return true;
 
             return false;
+
+
         }
+
+        public bool IsInRange(int m, int n) => m >= 0 && n >= 0 && m < _lengthRow && n < _lengthCol;
+        public bool IsInRange(Point p) => IsInRange(p.Row, p.Col);
+
 
     }
 }

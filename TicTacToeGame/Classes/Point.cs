@@ -9,26 +9,26 @@ namespace TicTacToeGame
     [Serializable]
     public class Point : IComparer<Point>
     {
-        public int M;
-        public int N;
+        public int Row;
+        public int Col;
 
-        public Point(int m, int n)
+        public Point(int row, int col)
         {
-            M = m;
-            N = n;
+            Row = row;
+            Col = col;
         }
 
-        public override string ToString() => $"[{M,2},{N,2}]";
+        public override string ToString() => $"[{Row,2},{Col,2}]";
 
-        public Point Copy() => new(M, N);
+        public Point Copy() => new(Row, Col);
 
-        public int Compare(Point? x, Point? y)
+        public int Compare(Point? row, Point? col)
         {
-            if (x == null && y == null) return 0;
-            if (x == null) return -1;
-            if (y == null) return 1;
-            if (x.M == y.M && x.N == y.N) return 0;
-            return 1000 * (x.M + x.N) - (y.M + y.N);
+            if (row == null && col == null) return 0;
+            if (row == null) return -1;
+            if (col == null) return 1;
+            if (row.Row == col.Row && row.Col == col.Col) return 0;
+            return 1000 * (row.Row + row.Col) - (col.Row + col.Col);
         }
 
         static public Point Zero => new(0, 0);
