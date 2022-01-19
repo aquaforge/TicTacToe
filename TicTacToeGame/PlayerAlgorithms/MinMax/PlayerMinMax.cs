@@ -9,7 +9,7 @@ namespace TicTacToeGame
     public class PlayerMinMax : IPlayerAI
     {
         public const int FITNESS_VICTORY_VALUE = 10000;
-        const int SEARCH_CELL_RANGE = 3;
+        const int SEARCH_CELL_RANGE = 2;
         const int SEARCH_DEPTH = 3;
 
         static Point[] directions = {
@@ -56,15 +56,21 @@ namespace TicTacToeGame
             {
                 if (node.Data.Board.IsWon)
                 {
-                    node.Data.FitnessValue = (node.Data.IsMyTurn ? 1 : -1) * FITNESS_VICTORY_VALUE;
+                    node.Data.FitnessValue = (node.Data.IsMyTurn ? 1 : -1) 
+                        * (FITNESS_VICTORY_VALUE - node.Level);
                     return;
+                }
+                else
+                {
+                    node.Data.FitnessValue = (node.Data.IsMyTurn ? 1 : -1)
+                        * GetFintessValue(node.Data.Board, node.Data.Point.Row, node.Data.Point.Col, 3);
                 }
             }
 
             if (node.Level >= SEARCH_DEPTH) return;
 
-            PlayerTypes player = node.IsRoot ? node.Data.Player : Board.PlayerSwap(node.Data.Player);
-            bool isMyTurn = node.IsRoot ? false : !node.Data.IsMyTurn;
+            PlayerTypes player = node.Data.Player;
+            bool isMyTurn = node.IsRoot ? true : !node.Data.IsMyTurn;
 
             HashSet<Point> points = FindEmptyCells(node.Data.Board);
             foreach (Point p in points)
@@ -75,12 +81,15 @@ namespace TicTacToeGame
                 node.AddChild(data);
             }
 
-            foreach (var child in node.Children)
-                CalculateFitness(child);
 
-            //ParallelLoopResult parallelResult = Parallel.ForEach(node.Children, new ParallelOptions { CancellationToken = token }, (child) =>
-            //{CalculateFitness(child);});
-            //Task.FromResult(parallelResult).Wait();
+
+            ParallelLoopResult parallelResult = Parallel.ForEach(node.Children, new ParallelOptions { CancellationToken = token }, (child) =>
+            { CalculateFitness(child); });
+            Task.FromResult(parallelResult).Wait();
+
+            //foreach (var child in node.Children)
+            //    CalculateFitness(child);
+
 
             if (node.Children.Count == 0) return;
 
@@ -103,9 +112,6 @@ namespace TicTacToeGame
                                 if (board.IsInRange(i, j) && board[i, j] == PlayerTypes.EMPTY)
                                     points.Add(new Point(i, j));
                     }
-            //foreach (Point point in points)
-            //    node.AddChild(new MinMaxData(data.Player, point.Copy(), !data.IsMyTurn, board.Copy(), random));
-
             return points;
         }
 

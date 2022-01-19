@@ -6,7 +6,9 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
-            IGame g = new Game(7, 5);
+            GeneralFileLogger.Log("Start", true);
+
+            IGame g = new Game(20, 15);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())
@@ -22,7 +24,7 @@ namespace TicTacToeGame
         {
             //Header
             Console.Clear();
-            Console.Write(new string(' ',3));
+            Console.Write(new string(' ', 3));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             for (int col = 0; col < g.LengthCol; col++)
                 Console.Write($"{col,2} ");

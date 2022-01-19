@@ -12,7 +12,7 @@ namespace TicTacToeGame
 
         private static readonly object _lock = new object();
 
-        public static void Log(string logText)
+        public static void Log(string logText, bool clearLog = false)
         {
             try
             {
@@ -20,7 +20,10 @@ namespace TicTacToeGame
                 {
                     string text = $"<br>{string.Format("{0:dd.MM.yyyy HH:mm:ss}", DateTime.Now)} {logText}{Environment.NewLine}";
                     //string filePath = Path.Combine(Directory.GetCurrentDirectory(), "_error_.log");
-                    File.AppendAllText(filePath, text);
+                    if (clearLog)
+                        File.WriteAllText(filePath, text);
+                    else
+                        File.AppendAllText(filePath, text);
                 }
             }
             catch (Exception ex)

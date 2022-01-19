@@ -9,6 +9,8 @@ namespace TicTacToeGame
 {
     public class TreeNode<TData>
     {
+        private const int LEVEL_TO_TEXT = 1;
+
         public TData Data { get; set; }
         public TreeNode<TData>? Parent { get; set; }
         public List<TreeNode<TData>> Children { get; set; } = new();
@@ -36,6 +38,8 @@ namespace TicTacToeGame
 
         static string ToStringNodeWithChildren(TreeNode<TData> node)
         {
+            if (node.Level > LEVEL_TO_TEXT) return "";
+
             string result = node.ToString() + Environment.NewLine;
 
             foreach (var child in node.Children)
