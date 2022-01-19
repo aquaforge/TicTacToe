@@ -8,7 +8,7 @@ namespace TicTacToeGame
         {
             GeneralFileLogger.Log("Start", true);
 
-            IGame g = new Game(20, 15);
+            IGame g = new Game(8, 7);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())

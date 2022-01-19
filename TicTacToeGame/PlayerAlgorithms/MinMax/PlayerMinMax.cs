@@ -76,7 +76,7 @@ namespace TicTacToeGame
 
             if (node.Level >= SEARCH_DEPTH) return;
 
-            PlayerTypes player = node.Data.Player;
+            PlayerTypes player = Board.PlayerSwap(node.Data.Player);
             bool isMyTurn = node.IsRoot ? true : !node.Data.IsMyTurn;
 
             HashSet<Point> points = FindEmptyCells(node.Data.Board);
@@ -84,21 +84,16 @@ namespace TicTacToeGame
             {
                 var board = node.Data.Board.Copy();
                 board[p.Row, p.Col] = player;
-                var data = new BoardToCheck(board, isMyTurn, Board.PlayerSwap(player), p.Copy(), random);
+                var data = new BoardToCheck(board, isMyTurn, player, p.Copy(), random);
                 node.AddChild(data);
             }
 
+            if (points.Count == 0) return;
 
-
+            //foreach (var child in node.Children) CalculateFitness(child);
             ParallelLoopResult parallelResult = Parallel.ForEach(node.Children, new ParallelOptions { CancellationToken = token }, (child) =>
             { CalculateFitness(child); });
             Task.FromResult(parallelResult).Wait();
-
-            //foreach (var child in node.Children)
-            //    CalculateFitness(child);
-
-
-            if (node.Children.Count == 0) return;
 
             if (isMyTurn)
                 node.Data.FitnessValue = node.Children.Max(n => n.Data.FitnessValue);
