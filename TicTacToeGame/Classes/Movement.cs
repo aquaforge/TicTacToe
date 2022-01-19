@@ -22,6 +22,6 @@ namespace TicTacToeGame
 
         public Movement Copy => new (Player, Point, ElapsedMilliseconds);
 
-        public override string ToString() => $"{Player}{Point} {ElapsedMilliseconds}ms";
+        public override string ToString() => $"{Player} {Point} {ElapsedMilliseconds}ms";
     }
 }

@@ -19,7 +19,7 @@
         void DoStartThinking();
         void DoUndo();
 
-        public List<Movement> MovementsGetTop(int top);
+        public List<Movement> MovementsGetTop(int top = 0);
         public int MovementsCount();
         public bool IsGameFinished();
     }

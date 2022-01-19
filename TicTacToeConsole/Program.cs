@@ -1,4 +1,5 @@
-﻿using TicTacToeGame;
+﻿using System.Text;
+using TicTacToeGame;
 
 namespace TicTacToeGame
 {
@@ -8,7 +9,7 @@ namespace TicTacToeGame
         {
             GeneralFileLogger.Log("Start", true);
 
-            IGame g = new Game(8, 7);
+            IGame g = new Game(20, 25);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())
@@ -18,6 +19,7 @@ namespace TicTacToeGame
                 DrawToConsole(g);
                 //Thread.Sleep(100);
             }
+            Console.ReadKey();
         }
 
         private static void DrawToConsole(IGame g)
@@ -65,11 +67,21 @@ namespace TicTacToeGame
             }
 
             //Draw Info
-            Console.WriteLine(g.GameState.ToString().ToLower() + " " + g.MovementsCount());
-            List<Movement> movements = g.MovementsGetTop(5);
-            for (int i = movements.Count - 1; i >= 0; i--)
-                Console.WriteLine(movements[i].ToString());
+            var sb = new StringBuilder();
+            sb.Append(g.GameState.ToString().ToUpper() + " ");
+            sb.Append($"Movements={g.MovementsCount()} ");
 
+            List<Movement> movements = g.MovementsGetTop();
+            foreach (PlayerTypes pt in new[] { PlayerTypes.X, PlayerTypes.O })
+            {
+                int elapsed = (int)movements.Where(m => m.Player == PlayerTypes.X && m.ElapsedMilliseconds > 0).Average(m => m.ElapsedMilliseconds);
+                sb.Append($"{pt}: {elapsed}ms ");
+            }
+            sb.AppendLine();
+            for (int i = movements.Count - 1; i >= Math.Max(0, movements.Count - 5); i--)
+                sb.AppendLine(movements[i].ToString());
+
+            Console.WriteLine(sb.ToString());
         }
 
 
