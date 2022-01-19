@@ -6,7 +6,7 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
-            IGame g = new Game(7, 8);
+            IGame g = new Game(7, 5);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())

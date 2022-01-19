@@ -20,21 +20,9 @@ namespace TicTacToeGame
         }
 
         public Boolean IsRoot => Parent == null;
-
         public Boolean IsLeaf => Children.Count == 0;
+        public int Level => (Parent?.Level ?? -1) + 1;
 
-
-        public int Level
-        {
-            get
-            {
-                if (IsRoot) return 0;
-                return (Parent?.Level ?? 0) + 1;
-            }
-        }
-
-        public override string ToString() => Data?.ToString() ?? "";
-        
 
         public TreeNode<TData> AddChild(TData data)
         {
@@ -42,5 +30,19 @@ namespace TicTacToeGame
             Children.Add(childNode);
             return childNode;
         }
+
+        public override string ToString() => (IsRoot ? "[root]" : new string('>', Level) + Data?.ToString() ?? "");
+        public string ToText() => ToStringNodeWithChildren(this);
+
+        static string ToStringNodeWithChildren(TreeNode<TData> node)
+        {
+            string result = node.ToString() + Environment.NewLine;
+
+            foreach (var child in node.Children)
+                result += ToStringNodeWithChildren(child);
+
+            return result;
+        }
+
     }
 }

@@ -8,10 +8,6 @@ namespace TicTacToeGame
 {
     public class Board
     {
-
-
-
-        public const int FITNESS_VICTORY_VALUE = 10000;
         private const int WIN_LENGTH = 5;
 
         private readonly PlayerTypes[,] _board;
@@ -169,7 +165,7 @@ namespace TicTacToeGame
 
         }
 
-        public bool IsInRange(int m, int n) => m >= 0 && n >= 0 && m < _lengthRow && n < _lengthCol;
+        public bool IsInRange(int row, int col) => row >= 0 && col >= 0 && row < _lengthRow && col < _lengthCol;
         public bool IsInRange(Point p) => IsInRange(p.Row, p.Col);
 
 
@@ -190,6 +186,10 @@ namespace TicTacToeGame
             return sb.ToString();
         }
 
+        static public PlayerTypes PlayerSwap(PlayerTypes player) => (player == PlayerTypes.O ? PlayerTypes.X : PlayerTypes.O);
     }
+
+
+
 }
 

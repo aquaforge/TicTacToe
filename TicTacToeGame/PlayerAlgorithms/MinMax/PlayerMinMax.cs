@@ -8,11 +8,11 @@ namespace TicTacToeGame
 {
     public class PlayerMinMax : IPlayerAI
     {
+        public const int FITNESS_VICTORY_VALUE = 10000;
+        const int SEARCH_CELL_RANGE = 3;
+        const int SEARCH_DEPTH = 3;
 
-         const int SEARCH_CELL_RANGE = 2;
-         const int SEARCH_DEPTH = 3;
-
-         static Point[] directions = {
+        static Point[] directions = {
                 new Point(1, 0), new Point(-1, 0),
                 new Point(0, 1), new Point(0, -1),
                 new Point(1, 1), new Point(1, -1),
@@ -21,6 +21,7 @@ namespace TicTacToeGame
 
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         CancellationToken token;
+        //cancelTokenSource.Cancel();
 
         readonly Random random = new Random();
 
@@ -29,36 +30,86 @@ namespace TicTacToeGame
 
         public Point GetNextMovement(IGame g) => GetNextMovement(g.Board, g.PlayerToMove);
         public Point GetNextMovement(Board board, PlayerTypes playerToMove)
-
         {
+            BoardToCheck data;
             token = cancelTokenSource.Token;
-            //cancelTokenSource.Cancel();
-            //if (token.IsCancellationRequested) {}
 
-
-            TreeNode<MinMaxTreeNodeData> root = new(new MinMaxTreeNodeData(playerToMove, Point.MaxPoint, false, board.Copy()), null);
+            data = new BoardToCheck(board.Copy(), isMyTurn: true, playerToMove, point: null, random);
+            var root = new TreeNode<BoardToCheck>(data, null);
             CalculateFitness(root);
 
-
-            //string s = Environment.NewLine;
-            //foreach (var item in root.Children.OrderByDescending(d => d.Data?.FitnessValue).Select(dd => dd.Data))
-            //{
-            //    s += item.ToString() + Environment.NewLine;
-            //}
-            //GeneralFileLogger.Log(s);
-            GeneralFileLogger.Log(new Tree<MinMaxTreeNodeData>(root).ToString());
-
-
             double fitnessValue = root.Children.Max(d => d.Data.FitnessValue);
-            MinMaxTreeNodeData resultData = root.Children
-                .Where(d => Math.Abs((double)d.Data.FitnessValue - (double)fitnessValue) < 0.001)
+            BoardToCheck resultData = root.Children
+                .Where(d => Math.Abs((double)d.Data.FitnessValue - (double)fitnessValue) < 0.01)
                 .OrderBy(d => d.Data.ShuffleSort).Select(dd => dd.Data)
                 .First();
-            return resultData.Point.Copy();
+
+            GeneralFileLogger.Log(Environment.NewLine + root.ToText());
+            return resultData.LastAffectedCell.Copy();
         }
 
 
-        public double CalculateFintess(Board board, int row, int col, int searchRange)
+        private void CalculateFitness(TreeNode<BoardToCheck> node)
+        {
+            if (token.IsCancellationRequested) return;
+            if (!node.IsRoot && node.Data.Point != null)
+            {
+                if (node.Data.Board.IsWon)
+                {
+                    node.Data.FitnessValue = (node.Data.IsMyTurn ? 1 : -1) * FITNESS_VICTORY_VALUE;
+                    return;
+                }
+            }
+
+            if (node.Level >= SEARCH_DEPTH) return;
+
+            PlayerTypes player = node.IsRoot ? node.Data.Player : Board.PlayerSwap(node.Data.Player);
+            bool isMyTurn = node.IsRoot ? false : !node.Data.IsMyTurn;
+
+            HashSet<Point> points = FindEmptyCells(node.Data.Board);
+            foreach (Point p in points)
+            {
+                var board = node.Data.Board.Copy();
+                board[p.Row, p.Col] = player;
+                var data = new BoardToCheck(board, isMyTurn, Board.PlayerSwap(player), p.Copy(), random);
+                node.AddChild(data);
+            }
+
+            foreach (var child in node.Children)
+                CalculateFitness(child);
+
+            //ParallelLoopResult parallelResult = Parallel.ForEach(node.Children, new ParallelOptions { CancellationToken = token }, (child) =>
+            //{CalculateFitness(child);});
+            //Task.FromResult(parallelResult).Wait();
+
+            if (node.Children.Count == 0) return;
+
+            if (isMyTurn)
+                node.Data.FitnessValue = node.Children.Min(n => n.Data.FitnessValue);
+            else
+                node.Data.FitnessValue = node.Children.Max(n => n.Data.FitnessValue);
+        }
+
+
+        static HashSet<Point> FindEmptyCells(Board board)
+        {
+            HashSet<Point> points = new(new PointEqualityComparer());
+            for (int row = 0; row < board.LengthRow; row++)
+                for (int col = 0; col < board.LengthCol; col++)
+                    if (board[row, col] != PlayerTypes.EMPTY)
+                    {
+                        for (int i = row - SEARCH_CELL_RANGE; i <= row + SEARCH_CELL_RANGE; i++)
+                            for (int j = col - SEARCH_CELL_RANGE; j <= col + SEARCH_CELL_RANGE; j++)
+                                if (board.IsInRange(i, j) && board[i, j] == PlayerTypes.EMPTY)
+                                    points.Add(new Point(i, j));
+                    }
+            //foreach (Point point in points)
+            //    node.AddChild(new MinMaxData(data.Player, point.Copy(), !data.IsMyTurn, board.Copy(), random));
+
+            return points;
+        }
+
+        static public double GetFintessValue(Board board, int row, int col, int searchRange)
         {
 
             PlayerTypes player = board[row, col];
@@ -81,59 +132,5 @@ namespace TicTacToeGame
                 }
             return fitness;
         }
-
-        private void CalculateFitness(TreeNode<MinMaxTreeNodeData> node)
-        {
-            if (token.IsCancellationRequested) return;
-
-            MinMaxTreeNodeData data = node.Data;
-            Board board = data.Board;
-
-            PlayerTypes player = data.Player;
-            if (!data.IsMyTurn) player = (player == PlayerTypes.O ? PlayerTypes.X : PlayerTypes.O);
-
-            if (!node.IsRoot)
-            {
-                board[data.Point.Row, data.Point.Col] = player;
-                if (board.IsWon)
-                {
-                    data.FitnessValue = (data.IsMyTurn ? 1 : -1) * (Board.FITNESS_VICTORY_VALUE - node.Level);
-                    //if (data.FitnessValue < 0) 
-                    //    GeneralFileLogger.Log(node.Level + " isWon " + data.ToString());
-                    return;
-                }
-            }
-
-            if (node.Level < SEARCH_DEPTH)
-            {
-                HashSet<Point> points = new(new PointEqualityComparer());
-                for (int row = 0; row < board.LengthRow; row++)
-                    for (int col = 0; col < board.LengthCol; col++)
-                        if (board[row, col] != PlayerTypes.EMPTY)
-                        {
-                            for (int i = row - SEARCH_CELL_RANGE; i <= row + SEARCH_CELL_RANGE; i++)
-                                for (int j = col - SEARCH_CELL_RANGE; j <= col + SEARCH_CELL_RANGE; j++)
-                                    if (i >= 0 && j >= 0 && i < board.LengthRow && j < board.LengthCol && board[i, j] == PlayerTypes.EMPTY)
-                                        points.Add(new Point(i, j));
-                        }
-                foreach (Point point in points)
-                    node.AddChild(new MinMaxTreeNodeData(data.Player, point.Copy(), !data.IsMyTurn, board.Copy(), random));
-            }
-            if (node.Children.Count == 0) return;
-
-            //ParallelLoopResult parallelResult = Parallel.ForEach(node.Children, new ParallelOptions { CancellationToken = token }, (child) =>
-            foreach (var child in node.Children)
-            {
-                CalculateFitness(child);
-            }
-            //); Task.FromResult(parallelResult).Wait();
-
-            if (!data.IsMyTurn)
-                data.FitnessValue = node.Children.Max(n => n.Data.FitnessValue);
-            else
-                data.FitnessValue = node.Children.Min(n => n.Data.FitnessValue);
-
-        }
-
     }
 }
