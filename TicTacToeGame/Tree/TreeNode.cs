@@ -9,7 +9,7 @@ namespace TicTacToeGame
 {
     public class TreeNode<TData>
     {
-        private const int LEVEL_TO_TEXT = 1;
+        private const int LEVEL_TO_TEXT = 5;
 
         public TData Data { get; set; }
         public TreeNode<TData>? Parent { get; set; }

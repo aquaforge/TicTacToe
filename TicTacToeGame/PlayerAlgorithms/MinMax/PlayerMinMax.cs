@@ -44,7 +44,14 @@ namespace TicTacToeGame
                 .OrderBy(d => d.Data.ShuffleSort).Select(dd => dd.Data)
                 .First();
 
-            GeneralFileLogger.Log(Environment.NewLine + root.ToText());
+            string s = string.Join(Environment.NewLine, root.Children
+                .OrderByDescending(c => c.Data.FitnessValue)
+                .ThenBy(c => c.Data.Point)
+                .Select(c => c.Data.ToString()));
+            GeneralFileLogger.Log(Environment.NewLine + s);
+
+            //GeneralFileLogger.Log(Environment.NewLine + root.ToText());
+
             return resultData.LastAffectedCell.Copy();
         }
 
@@ -56,7 +63,7 @@ namespace TicTacToeGame
             {
                 if (node.Data.Board.IsWon)
                 {
-                    node.Data.FitnessValue = (node.Data.IsMyTurn ? 1 : -1) 
+                    node.Data.FitnessValue = (node.Data.IsMyTurn ? 1 : -1)
                         * (FITNESS_VICTORY_VALUE - node.Level);
                     return;
                 }
@@ -94,9 +101,9 @@ namespace TicTacToeGame
             if (node.Children.Count == 0) return;
 
             if (isMyTurn)
-                node.Data.FitnessValue = node.Children.Min(n => n.Data.FitnessValue);
-            else
                 node.Data.FitnessValue = node.Children.Max(n => n.Data.FitnessValue);
+            else
+                node.Data.FitnessValue = node.Children.Min(n => n.Data.FitnessValue);
         }
 
 

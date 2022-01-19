@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TicTacToeGame
 {
     [Serializable]
-    public class Point : ICloneable, IEquatable<Point>
+    public class Point : ICloneable, IEquatable<Point>, IComparable<Point>
     {
         public int Row, Col;
 
@@ -37,6 +37,12 @@ namespace TicTacToeGame
         static public Point Zero => new(0, 0);
         static public Point MaxPoint => new(byte.MaxValue, byte.MaxValue);
         public override int GetHashCode() => (Row << 2) ^ Col;
+
+        public int CompareTo(Point? other)
+        {
+            if (other == null) return -1;
+            return 10000 * (Row - other.Row) + (Col - other.Col);
+        }
     }
 
 
