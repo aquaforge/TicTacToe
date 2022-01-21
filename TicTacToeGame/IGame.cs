@@ -22,5 +22,6 @@
         public List<Movement> MovementsGetTop(int top = 0);
         public int MovementsCount();
         public bool IsGameFinished();
+        string CellAsString(int row, int col);
     }
 }

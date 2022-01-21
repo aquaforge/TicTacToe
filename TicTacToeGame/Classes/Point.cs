@@ -17,7 +17,7 @@ namespace TicTacToeGame
             Col = col;
         }
 
-        public override string ToString() => $"[{Row,2},{Col,2}]";
+        public override string ToString() => $"({Row:00},{Col:00})";
         public Point Copy() => new Point(Row, Col);
 
         object ICloneable.Clone() => MemberwiseClone();

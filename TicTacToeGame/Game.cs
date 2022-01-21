@@ -42,7 +42,9 @@ namespace TicTacToeGame
         public bool IsGameFinished() => _gameState == GameStates.X_WON || _gameState == GameStates.O_WON || _gameState == GameStates.DRAW;
 
 
+        public string CellAsString(int row, int col) => _board.CellAsString(row, col);
 
+        public override string ToString() => $"MOVEMENTS:{_movements.Count}; LAST:{_movements.MovementLastPlayer}; {_board}";
 
         public Game(byte row, byte col)
         {

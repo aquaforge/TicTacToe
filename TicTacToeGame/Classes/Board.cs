@@ -173,20 +173,24 @@ namespace TicTacToeGame
         {
             var sb = new StringBuilder();
 
-            sb.Append($"WON={IsWon} DRAW={IsDraw}");
-            if (_lastAffectedCell != null) sb.Append($" LAST_MOVE={_lastAffectedCell}");
-
+            sb.Append($"STATE:{(IsWon ? "WON":"")}{(IsDraw?"DRAW":"")};");
+            if (_lastAffectedCell != null) sb.Append($" LAST_MOVE:{_lastAffectedCell};");
+            sb.Append(" SET:");
             for (int row = 0; row < _lengthRow; row++)
             {
-                sb.Append('|');
                 for (int col = 0; col < _lengthCol; col++)
-                    sb.Append(_board[row, col].ToString());
+                    sb.Append(CellAsString(row, col));
+                sb.Append('|');
             }
-
+            sb.Remove(sb.Length - 1, 1);
             return sb.ToString();
         }
 
+        public string CellAsString(int row, int col) => _board[row, col] == PlayerTypes.EMPTY ? "_" : _board[row, col].ToString();
+
+
         static public PlayerTypes PlayerSwap(PlayerTypes player) => (player == PlayerTypes.O ? PlayerTypes.X : PlayerTypes.O);
+
     }
 
 

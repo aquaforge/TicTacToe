@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicTacToeGame", "TicTacToeG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateMachine", "StateMachine\StateMachine.csproj", "{6852A5FF-B9E5-4D70-9671-C2503E86DA72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToeGameTests", "TicTacToeGameTests\TicTacToeGameTests.csproj", "{F3D4BB86-DB6F-443B-A1C0-4D0BAA1D061C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicTacToeGameTests", "TicTacToeGameTests\TicTacToeGameTests.csproj", "{F3D4BB86-DB6F-443B-A1C0-4D0BAA1D061C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
