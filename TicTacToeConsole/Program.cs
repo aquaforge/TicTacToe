@@ -7,19 +7,72 @@ namespace TicTacToeGame
     {
         public static void Main(string[] args)
         {
+            for (int i = 0; i < 100; i++)
+            {
+                DoOneGame();
+                Thread.Sleep(1000);
+            }
+
+
+            Console.ReadKey();
+        }
+        public static void DoOneGame()
+        {
             GeneralFileLogger.Log("Start", true);
 
-            IGame g = new Game(20, 25);
+            IGame g = new Game(10, 8);
             IPlayerAI playerMinMax = new PlayerMinMax();
 
             while (!g.IsGameFinished())
             {
                 g.DoStartThinking();
-                g.DoMove(playerMinMax.GetNextMovement(g));
+                Point next = playerMinMax.GetNextMovement(g);
+                SaveMovement(g, next);
+                g.DoMove(next);
                 DrawToConsole(g);
-                //Thread.Sleep(100);
             }
-            Console.ReadKey();
+        }
+
+        private static void SaveMovement(IGame g, Point next)
+        {
+            StringBuilder sb = new();
+            string filename = @"D:\Temp\TicTacToe\" + $"movements_{g.LengthRow:00}_{g.LengthCol:00}.csv";
+
+            if (!File.Exists(filename))
+            {
+                sb.Append("class;");
+                for (int row = 0; row < g.LengthRow; row++)
+                    for (int col = 0; col < g.LengthCol; col++)
+                        sb.Append($"item{row:00}{col:00};");
+                sb.Remove(sb.Length - 1, 1);
+                sb.Append(Environment.NewLine);
+                File.WriteAllText(filename, sb.ToString());
+                sb.Clear();
+            }
+
+            sb.Append(next.Row * g.LengthCol + next.Col);
+            sb.Append(';');
+
+            for (int row = 0; row < g.LengthRow; row++)
+                for (int col = 0; col < g.LengthCol; col++)
+                {
+                    switch (g[row, col])
+                    {
+                        case PlayerTypes.EMPTY:
+                            sb.Append(0);
+                            break;
+                        case PlayerTypes.X:
+                        case PlayerTypes.O:
+                            sb.Append(g[row, col] == g.PlayerToMove ? 1 : -1);
+                            break;
+                        default:
+                            break;
+                    }
+                    sb.Append(';');
+                }
+            sb.Remove(sb.Length - 1, 1);
+            sb.Append(Environment.NewLine);
+            File.AppendAllText(filename, sb.ToString());
         }
 
         private static void DrawToConsole(IGame g)
@@ -74,8 +127,9 @@ namespace TicTacToeGame
             List<Movement> movements = g.MovementsGetTop();
             foreach (PlayerTypes pt in new[] { PlayerTypes.X, PlayerTypes.O })
             {
-                int elapsed = (int)movements.Where(m => m.Player == PlayerTypes.X && m.ElapsedMilliseconds > 0).Average(m => m.ElapsedMilliseconds);
-                sb.Append($"{pt}: {elapsed}ms ");
+                var playerMovements = movements.Where(m => m.Player == PlayerTypes.X && m.ElapsedMilliseconds > 0);
+                if (playerMovements.Any())
+                    sb.Append($"{pt}: {playerMovements.Average(m => m.ElapsedMilliseconds)}ms ");
             }
             sb.AppendLine();
             for (int i = movements.Count - 1; i >= Math.Max(0, movements.Count - 5); i--)
