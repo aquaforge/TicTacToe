@@ -12,10 +12,9 @@ namespace TicTacToeGame
                 DoOneGame(i);
                 Thread.Sleep(1000);
             }
-
-
-            Console.ReadKey();
         }
+
+
         public static void DoOneGame(int gameNo = 0)
         {
             GeneralFileLogger.Log("Start", true);
